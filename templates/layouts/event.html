@@ -1,18 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reservación de Asientos</title>
     {% load static %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack.min.css" />
-    <style>
-        .grid-stack-item-content { display: flex; align-items: center; justify-content: center; }
-        .available { background-color: transparent; }
-        .reserved { background-color: transparent; }
-        .seat-svg { width: 50px; height: 50px; cursor: pointer; }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Reservación de Asientos para el Evento {{ event_id }}</h1>
+<body class="bg-gray-100 text-gray-800">
+    <h1 class="text-3xl font-bold text-center my-6">Reservación de Asientos para el Evento {{ event_id }}</h1>
+
+    <!-- Tarjeta con descripción de las sillas  -->
+    <div class="flex justify-center items-center space-x-4 bg-white p-2 shadow-md rounded-lg mx-auto mb-6 max-w-sm w-full">
+        <div class="flex items-center space-x-2">
+            <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" alt="Disponible" class="w-6 h-6 md:w-8 md:h-8">
+            <span class="text-sm md:text-base font-semibold text-blue-600">Disponible</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <img src="{% static 'assets/img/illustrations/silla_roja.svg' %}" alt="Ocupada" class="w-6 h-6 md:w-8 md:h-8">
+            <span class="text-sm md:text-base font-semibold text-red-600">Ocupada</span>
+        </div>
+    </div>
+
     <div class="grid-stack"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack-h5.min.js"></script>
@@ -39,7 +49,7 @@
                 el.classList.add('grid-stack-item');
                 el.innerHTML = `
                     <div class="grid-stack-item-content ${seat.status}" id="${seat.id}">
-                        <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" class="seat-svg" />
+                        <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" class="seat-svg w-10 h-10 mx-auto" />
                     </div>`;
                 grid.addWidget(el, { x: seat.x, y: seat.y, w: 1, h: 1 });
 
@@ -67,7 +77,7 @@
                 const seatElement = document.getElementById(seatID);
                 if (seatElement) {
                     seatElement.className = `grid-stack-item-content ${status ? 'reserved' : 'available'}`;
-                    seatElement.querySelector('.seat-svg').src = status ? '{% static 'assets/img/illustrations/silla_roja.svg' %}' : '{% static 'assets/img/illustrations/silla_azul.svg' %}';
+                    seatElement.querySelector('.seat-svg').src = status ? '{% static "assets/img/illustrations/silla_roja.svg" %}' : '{% static "assets/img/illustrations/silla_azul.svg" %}';
                 }
             };
 
