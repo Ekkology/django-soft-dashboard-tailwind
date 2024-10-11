@@ -18,6 +18,12 @@ def index(request):
     }
     return render(request, 'pages/dashboard.html', context)
 
+
+
+
+def event_view(request, event_id):
+    return render(request, 'layouts/event.html', {'event_id': event_id})
+
 @login_required(login_url="/accounts/login/")
 def tables(request):
     context = {

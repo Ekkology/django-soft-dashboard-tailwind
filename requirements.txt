@@ -1,7 +1,13 @@
 django
 gunicorn
+uvicorn[standard]
 python-dotenv
 whitenoise
-
-# psycopg2-binary
+psycopg2-binary
 # mysqlclient
+channels== 3.0.5
+redis 
+asgiref
+channels_redis
+websockets
+wsproto
