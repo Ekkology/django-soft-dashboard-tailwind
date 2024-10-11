@@ -2,11 +2,13 @@
 <html>
 <head>
     <title>Reservación de Asientos</title>
+    {% load static %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack.min.css" />
     <style>
         .grid-stack-item-content { display: flex; align-items: center; justify-content: center; }
-        .available { background-color: green; }
-        .reserved { background-color: red; }
+        .available { background-color: transparent; }
+        .reserved { background-color: transparent; }
+        .seat-svg { width: 50px; height: 50px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -35,7 +37,10 @@
             seats.forEach(seat => {
                 const el = document.createElement('div');
                 el.classList.add('grid-stack-item');
-                el.innerHTML = `<div class="grid-stack-item-content ${seat.status}" id="${seat.id}">${seat.id}</div>`;
+                el.innerHTML = `
+                    <div class="grid-stack-item-content ${seat.status}" id="${seat.id}">
+                        <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" class="seat-svg" />
+                    </div>`;
                 grid.addWidget(el, { x: seat.x, y: seat.y, w: 1, h: 1 });
 
                 el.addEventListener('click', () => {
@@ -62,6 +67,7 @@
                 const seatElement = document.getElementById(seatID);
                 if (seatElement) {
                     seatElement.className = `grid-stack-item-content ${status ? 'reserved' : 'available'}`;
+                    seatElement.querySelector('.seat-svg').src = status ? '{% static 'assets/img/illustrations/silla_roja.svg' %}' : '{% static 'assets/img/illustrations/silla_azul.svg' %}';
                 }
             };
 
