@@ -2,6 +2,8 @@ django
 gunicorn
 python-dotenv
 whitenoise
+celery
+redis
 
 # psycopg2-binary
 # mysqlclient
