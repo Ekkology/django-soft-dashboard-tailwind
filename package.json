@@ -15,8 +15,9 @@
     "dependencies": {
         "cli": "^1.0.1",
         "css-minify": "^2.0.0",
+        "gridstack": "^10.3.1",
         "highlight.js": "^11.4.0",
-        "tailwindcss-transforms": "^2.2.0",
-        "gridstack": "^10.3.1"  
+        "soft-ui-dashboard-tailwind": "file:",
+        "tailwindcss-transforms": "^2.2.0"
     }
 }
