@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear Evento</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack-h5.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var grid = GridStack.init({
+                float: true
+            });
+
+            // Función para generar sillas según el número introducido
+            function generarSillas(cantidad) {
+                grid.removeAll(); // Limpiar el grid
+                let filas = Math.ceil(Math.sqrt(cantidad)); // Calcular filas
+                let columnas = Math.ceil(cantidad / filas); // Calcular columnas
+
+                for (let i = 0; i < cantidad; i++) {
+                    var el = document.createElement('div');
+                    el.className = 'grid-stack-item';
+                    el.id = 'silla' + (i + 1);
+                    el.innerHTML = '<div class="grid-stack-item-content">' + el.id + '</div>';
+                    el.setAttribute('data-gs-x', i % columnas);
+                    el.setAttribute('data-gs-y', Math.floor(i / columnas));
+                    el.setAttribute('data-gs-width', '1');
+                    el.setAttribute('data-gs-height', '1');
+                    grid.addWidget(el);
+                }
+            }
+
+            // Evento para generar las sillas al introducir el número
+            document.getElementById('numSillas').addEventListener('change', function() {
+                var cantidad = parseInt(this.value);
+                if (!isNaN(cantidad) && cantidad > 0) {
+                    generarSillas(cantidad);
+                }
+            });
+
+            document.getElementById('saveConfig').addEventListener('click', function() {
+                var items = [];
+                grid.engine.nodes.forEach(function(node) {
+                    items.push({
+                        id: node.el.id,
+                        posicion: {x: node.x, y: node.y},
+                        estado: 'disponible'
+                    });
+                });
+
+                var configuracion = {
+                    tipo: 'rectangular',
+                    exponente_central: false,
+                    sillas: items
+                };
+
+                fetch('/save_configuration/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ configuracion: configuracion, event_id: {{ event.id }} })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Configuración guardada correctamente');
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Crear Evento</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="numSillas">Número de sillas:</label>
+        <input type="number" id="numSillas" name="numSillas" min="1" required>
+        <button type="submit">Crear Evento</button>
+    </form>
+    <h2>Configurar Sillas</h2>
+    <div class="grid-stack"></div>
+    <button id="saveConfig">Guardar Configuración</button>
+</body>
+</html>

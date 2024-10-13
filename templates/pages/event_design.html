@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diseño de Configuración de Asientos</title>
+    <link rel="stylesheet" href="{% static 'path/to/gridstack.min.css' %}">
+    <script src="{% static 'path/to/gridstack-h5.min.js' %}"></script>
+    <style>
+        .seat { width: 50px; height: 50px; cursor: pointer; }
+        .available { background-color: blue; }
+        .reserved { background-color: red; }
+    </style>
+</head>
+<body>
+    <h1>Diseño de Configuración de Asientos para el Evento {{ event.nombre }}</h1>
+    <div class="grid-stack"></div>
+    <button id="save-config">Guardar Configuración</button>
+
+    <form id="config-form" method="post" style="display: none;">
+        {% csrf_token %}
+        <textarea id="configuracion" name="configuracion"></textarea>
+        <button type="submit">Guardar</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const grid = GridStack.init();
+
+            // Cargar la configuración actual si existe
+            const configuracion = JSON.parse('{{ event.configuracion|escapejs }}');
+            if (configuracion && configuracion.length > 0) {
+                grid.load(configuracion);
+            }
+
+            document.getElementById('save-config').addEventListener('click', () => {
+                const config = grid.save();
+                document.getElementById('configuracion').value = JSON.stringify(config);
+                document.getElementById('config-form').submit();
+            });
+
+            // Agregar lógica para manejar clics en asientos
+            grid.on('change', function(event, items) {
+                items.forEach(function(item) {
+                    const el = item.el;
+                    if (!el.classList.contains('available') && !el.classList.contains('reserved')) {
+                        el.classList.add('available');
+                    }
+
+                    el.addEventListener('click', () => {
+                        el.classList.toggle('available');
+                        el.classList.toggle('reserved');
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

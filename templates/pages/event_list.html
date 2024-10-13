@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Eventos</title>
+</head>
+<body>
+    <h1>Lista de Eventos</h1>
+    <ul>
+        {% for event in events %}
+            <li>
+                {{ event.nombre }} - {{ event.fecha }}
+                <a href="{% url 'edit_event' event.id %}">Editar</a>
+                <a href="{% url 'design_event' event.id %}">Diseñar Configuración</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
