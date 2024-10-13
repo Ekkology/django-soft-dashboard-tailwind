@@ -6,8 +6,23 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack.min.css">
     <script src="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack-h5.min.js"></script>
     <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0; /* Fondo general de la página */
+        }
+        .grid-container {
+            background-color: #e0e0e0; /* Fondo del contenedor GridStack */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%; /* Ajusta el ancho del contenedor */
+        }
         .grid-stack-item-content {
-            background-color: transparent;
+            background-color: white;
             border-radius: 4px;
             display: flex;
             justify-content: center;
@@ -15,9 +30,6 @@
             width: 50px !important;
             height: 50px !important;
             position: relative;
-        }
-        .grid-stack {
-            margin-top: 20px;
         }
         .seat-svg {
             width: 100%;
@@ -36,10 +48,15 @@
             font-weight: bold;
             margin-bottom: 10px;
         }
-        .seat-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
+        /* Zona de Basura */
+        #trash {
+            background-color: rgba(255, 0, 0, 0.5);
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            color: white;
         }
     </style>
     <script>
@@ -47,68 +64,78 @@
             var grid = GridStack.init({
                 float: true,
                 cellHeight: 70,
-                column: 10
+                column: 10,
+                acceptWidgets: true,
+                disableResize: true, // Deshabilitar redimensionamiento globalmente
+                removable: '#trash', // Hacer el grid removible al arrastrar a la zona de basura
+                removeTimeout: 1000 // Tiempo antes de que se elimine
             });
 
+            // Generar las sillas
             document.getElementById('generateSeats').addEventListener('click', function() {
                 var numSillas = parseInt(document.getElementById('num_sillas').value) || 0;
-                
+
                 // Limpiar las sillas anteriores
-                document.querySelector('.grid-stack').innerHTML = '';
+                grid.removeAll();
 
-                // Calcular el número de sillas por fila
-                var sillasPorFila = 10; // Ajusta según el diseño deseado
-                var filas = Math.ceil(numSillas / sillasPorFila);
-
-                var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+                var sillasPorFila = 9; // Número de sillas por fila
                 var seatCounter = 1;
-                var rowIndex = 0;
+                var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
                 // Crear las filas y las sillas
-                for (var y = 0; y < filas; y++) {
-                    var rowContainer = document.createElement('div');
-                    rowContainer.className = 'seat-container';
-
-                    // Crear etiqueta de fila solo al comienzo de cada fila
-                    if (rowIndex < letters.length) {
-                        var rowLabel = document.createElement('div');
-                        rowLabel.className = 'row-label';
-                        rowLabel.textContent = "Row " + letters[rowIndex];
-                        rowContainer.appendChild(rowLabel);
-                        rowIndex++;
+                for (var y = 0; y < Math.ceil(numSillas / sillasPorFila); y++) {
+                    // Añadir etiqueta de fila como un item de Gridstack
+                    if (y < letters.length) {
+                        var rowLabelItem = document.createElement('div');
+                        rowLabelItem.className = 'grid-stack-item';
+                        rowLabelItem.innerHTML = `
+                            <div class="grid-stack-item-content row-label">
+                                Row ${letters[y]}
+                            </div>`;
+                        rowLabelItem.setAttribute('data-gs-x', 0);
+                        rowLabelItem.setAttribute('data-gs-y', y);
+                        rowLabelItem.setAttribute('data-gs-width', '1');
+                        rowLabelItem.setAttribute('data-gs-height', '1');
+                        rowLabelItem.setAttribute('data-gs-no-move', 'yes');
+                        rowLabelItem.setAttribute('data-gs-no-resize', 'yes');
+                        grid.addWidget(rowLabelItem);
                     }
 
                     // Añadir sillas a la fila actual
                     for (var x = 0; x < sillasPorFila; x++) {
                         if (seatCounter > numSillas) break;
 
-                        var el = document.createElement('div');
-                        el.className = 'grid-stack-item';
-                        el.innerHTML = `
+                        var seatItem = document.createElement('div');
+                        seatItem.className = 'grid-stack-item';
+                        seatItem.innerHTML = `
                             <div class="grid-stack-item-content" id="silla${seatCounter}">
                                 <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" class="seat-svg" />
                                 <div class="seat-number">${seatCounter}</div>
                             </div>`;
-                        el.setAttribute('data-gs-x', x);
-                        el.setAttribute('data-gs-y', y);
-                        el.setAttribute('data-gs-width', '1');
-                        el.setAttribute('data-gs-height', '1');
+                        seatItem.setAttribute('data-gs-x', x + 1); // Colocar a la derecha de la etiqueta de fila
+                        seatItem.setAttribute('data-gs-y', y);
+                        seatItem.setAttribute('data-gs-width', '1');
+                        seatItem.setAttribute('data-gs-height', '1');
+                        seatItem.setAttribute('data-gs-no-resize', 'yes'); // Bloquear redimensionamiento
 
-                        rowContainer.appendChild(el);
+                        grid.addWidget(seatItem);
                         seatCounter++;
                     }
-
-                    document.querySelector('.grid-stack').appendChild(rowContainer);
                 }
             });
 
+            // Guardar la configuración
             document.getElementById('saveConfig').addEventListener('click', function() {
                 var items = [];
                 grid.engine.nodes.forEach(function(node) {
+                    // Extraer el número de silla del id
+                    var numero = node.el.id.replace('silla', ''); // 'silla1' -> '1'
+                    
                     items.push({
                         id: node.el.id,
                         posicion: {x: node.x, y: node.y},
-                        estado: 'disponible'
+                        estado: 'disponible',
+                        numero: parseInt(numero) // Asegúrate de que sea un número entero
                     });
                 });
 
@@ -117,35 +144,52 @@
                     sillas: items
                 };
 
-                fetch('/save_configuration/', {
+                fetch('/event/save_configuration/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
+                        'X-CSRFToken': '{{ csrf_token }}' // Asegúrate de que estás pasando el token CSRF
                     },
-                    body: JSON.stringify({ configuracion: configuracion })
+                    body: JSON.stringify({ configuracion: configuracion, evento_id: '{{ event.id }}' })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert('Configuración guardada correctamente');
+                    } else {
+                        alert('Error al guardar la configuración: ' + data.error);
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Se produjo un error al guardar la configuración');
                 });
             });
         });
     </script>
 </head>
 <body>
-    <h1>Crear Evento</h1>
-    <form method="post" id="eventForm">
-        {% csrf_token %}
-        <label for="num_sillas">Número de sillas:</label>
-        <input type="number" id="num_sillas" name="num_sillas" min="0" required>
-        <button type="button" id="generateSeats">Generar Sillas</button>
-        <button type="button" id="saveConfig">Guardar Configuración</button>
-    </form>
-    <div class="grid-stack">
-        <!-- Las sillas se agregarán dinámicamente -->
+    <div class="grid-container">
+        <h1>Crear Evento</h1>
+        <form method="post" id="eventForm">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div>
+                <h3>Configuración de Sillas</h3>
+                <label for="num_sillas">Número de sillas:</label>
+                <input type="number" id="num_sillas" name="num_sillas" min="0" required>
+                <button type="button" id="generateSeats">Generar Sillas</button>
+                <button type="button" id="saveConfig">Guardar Configuración</button>
+            </div>
+            <button type="submit">Guardar Evento y Configuración</button>
+        </form>
+        <div class="grid-stack">
+            <!-- Las sillas se agregarán dinámicamente -->
+        </div>
+        <!-- Zona de Basura -->
+        <div id="trash">
+            Arrastra aquí para eliminar
+        </div>
     </div>
 </body>
 </html>

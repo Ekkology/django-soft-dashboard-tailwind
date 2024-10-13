@@ -1,34 +1,51 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from .models import Event  # Asegúrate de importar tu modelo de evento
-import json
+from .models import Event, chair  # Importa tu modelo de silla (Chair)
 from .forms import EventForm
 from django.views.decorators.csrf import csrf_exempt
-
-def create_event(request):
-    if request.method == 'POST':
-        form = EventForm(request.POST)
-        if form.is_valid():
-            event = form.save()
-            # Aquí podrías manejar la configuración de las sillas si es necesario
-            return redirect('event_detail', event_id=event.id)  # Redirigir a la vista de detalles del evento
-    else:
-        form = EventForm()
-    
-    return render(request, 'pages/configure_event.html', {'form': form})
+from django.db import IntegrityError, transaction
+import json
 
 @csrf_exempt
-def save_configuration(request):
+def create_event_and_save_configuration(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        configuracion = data.get('configuracion', {})
+        try:
+            data = json.loads(request.body)
+            event_data = data.get('event')
+            configuracion = data.get('configuracion')
 
-        # Aquí deberías guardar la configuración en tu modelo
-        event = Event.objects.create(
-            nombre='Nombre del evento',  # Cambia esto según sea necesario
-            fecha='2024-10-11',          # Cambia esto según sea necesario
-            configuracion=configuracion
-        )
+            form = EventForm(event_data)
+            if form.is_valid():
+                with transaction.atomic():
+                    evento = form.save()
 
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False}, status=400)
+                    for silla_data in configuracion.get('sillas', []):
+                        numero = silla_data.get('numero')
+                        posicion = silla_data.get('posicion')
+
+                        if not numero or not isinstance(numero, int) or numero <= 0:
+                            return JsonResponse({'error': 'Número de silla inválido.'}, status=400)
+
+                        try:
+                            chair.objects.create(
+                                numero=numero,
+                                posicion_x=posicion['x'],
+                                posicion_y=posicion['y'],
+                                evento=evento
+                            )
+                        except IntegrityError:
+                            return JsonResponse({'error': f'Número de silla {numero} ya existe.'}, status=400)
+
+                return JsonResponse({'success': True})
+
+            return JsonResponse({'error': 'Datos del evento inválidos.', 'errors': form.errors}, status=400)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'JSON inválido.'}, status=400)
+
+    return JsonResponse({'error': 'Método no permitido.'}, status=405)
+from django.shortcuts import render
+
+def show_event_form(request):
+    form = EventForm()  # Suponiendo que tienes un formulario de eventos llamado EventForm
+    return render(request, 'pages/event_form.html', {'form': form})

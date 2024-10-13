@@ -1,86 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
+{% load static %}
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Evento</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack.min.css">
     <script src="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack-h5.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0; /* Fondo general de la página */
+        }
+        .grid-container {
+            background-color: #e0e0e0; /* Fondo del contenedor GridStack */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Sombra mejorada */
+            width: 80%; /* Ajusta el ancho del contenedor */
+        }
+        .grid-stack-item-content {
+            background-color: white; /* Fondo blanco para los elementos */
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px !important;
+            height: 50px !important;
+            position: relative;
+            background: url("{% static 'assets/img/illustrations/dev_seal_background.svg' %}") no-repeat center center; /* Fondo para el "dev seal" */
+            background-size: cover; /* Ajusta el fondo al tamaño del contenedor */
+        }
+        .seat-svg {
+            width: 100%;
+            height: auto;
+        }
+        .seat-number {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            font-size: 12px;
+            color: black;
+        }
+        .row-label {
+            text-align: left;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        /* Mejora la visibilidad de los campos de entrada */
+        input[type="number"], button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para entradas y botones */
+            transition: box-shadow 0.3s;
+        }
+        input[type="number"]:focus, button:hover {
+            box-shadow: 0 0 10px rgba(0, 0, 255, 0.5); /* Efecto de sombra al enfocar o al pasar el ratón */
+            outline: none; /* Eliminar el contorno predeterminado */
+        }
+        /* Zona de Basura */
+        #trash {
+            background-color: rgba(255, 0, 0, 0.5);
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            color: white;
+        }
+    </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var grid = GridStack.init({
-                float: true
+                float: true,
+                cellHeight: 70,
+                column: 10,
+                acceptWidgets: true,
+                disableResize: true,
+                removable: '#trash',
+                removeTimeout: 1000
             });
 
-            // Función para generar sillas según el número introducido
-            function generarSillas(cantidad) {
-                grid.removeAll(); // Limpiar el grid
-                let filas = Math.ceil(Math.sqrt(cantidad)); // Calcular filas
-                let columnas = Math.ceil(cantidad / filas); // Calcular columnas
+            document.getElementById('generateSeats').addEventListener('click', function() {
+                var numSillas = parseInt(document.getElementById('num_sillas').value) || 0;
+                grid.removeAll();
+                var sillasPorFila = 9;
+                var seatCounter = 1;
+                var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-                for (let i = 0; i < cantidad; i++) {
-                    var el = document.createElement('div');
-                    el.className = 'grid-stack-item';
-                    el.id = 'silla' + (i + 1);
-                    el.innerHTML = '<div class="grid-stack-item-content">' + el.id + '</div>';
-                    el.setAttribute('data-gs-x', i % columnas);
-                    el.setAttribute('data-gs-y', Math.floor(i / columnas));
-                    el.setAttribute('data-gs-width', '1');
-                    el.setAttribute('data-gs-height', '1');
-                    grid.addWidget(el);
-                }
-            }
+                for (var y = 0; y < Math.ceil(numSillas / sillasPorFila); y++) {
+                    if (y < letters.length) {
+                        var rowLabelItem = document.createElement('div');
+                        rowLabelItem.className = 'grid-stack-item';
+                        rowLabelItem.innerHTML = 
+                            `<div class="grid-stack-item-content row-label">
+                                Row ${letters[y]}
+                            </div>`;
+                        rowLabelItem.setAttribute('data-gs-x', 0);
+                        rowLabelItem.setAttribute('data-gs-y', y);
+                        rowLabelItem.setAttribute('data-gs-width', '1');
+                        rowLabelItem.setAttribute('data-gs-height', '1');
+                        rowLabelItem.setAttribute('data-gs-no-move', 'yes');
+                        rowLabelItem.setAttribute('data-gs-no-resize', 'yes');
+                        grid.addWidget(rowLabelItem);
+                    }
 
-            // Evento para generar las sillas al introducir el número
-            document.getElementById('numSillas').addEventListener('change', function() {
-                var cantidad = parseInt(this.value);
-                if (!isNaN(cantidad) && cantidad > 0) {
-                    generarSillas(cantidad);
+                    for (var x = 0; x < sillasPorFila; x++) {
+                        if (seatCounter > numSillas) break;
+
+                        var seatItem = document.createElement('div');
+                        seatItem.className = 'grid-stack-item';
+                        seatItem.innerHTML = 
+                            `<div class="grid-stack-item-content" id="silla${seatCounter}">
+                                <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" class="seat-svg" />
+                                <div class="seat-number">${seatCounter}</div>
+                            </div>`;
+                        seatItem.setAttribute('data-gs-x', x + 1);
+                        seatItem.setAttribute('data-gs-y', y);
+                        seatItem.setAttribute('data-gs-width', '1');
+                        seatItem.setAttribute('data-gs-height', '1');
+                        seatItem.setAttribute('data-gs-no-resize', 'yes');
+
+                        grid.addWidget(seatItem);
+                        seatCounter++;
+                    }
                 }
             });
 
-            document.getElementById('saveConfig').addEventListener('click', function() {
+            document.getElementById('eventForm').addEventListener('submit', function(event) {
+                event.preventDefault();  // Evita que el formulario se envíe de la manera tradicional
+
+                var formData = new FormData(event.target);
+                var eventData = Object.fromEntries(formData.entries());
+
                 var items = [];
                 grid.engine.nodes.forEach(function(node) {
+                    var numero = node.el.id.replace('silla', '');
+
                     items.push({
                         id: node.el.id,
                         posicion: {x: node.x, y: node.y},
-                        estado: 'disponible'
+                        estado: 'disponible',
+                        numero: parseInt(numero)
                     });
                 });
 
                 var configuracion = {
                     tipo: 'rectangular',
-                    exponente_central: false,
                     sillas: items
                 };
 
-                fetch('/save_configuration/', {
+                console.log(JSON.stringify({ event: eventData, configuracion: configuracion }));
+
+                fetch('/event/create_event_and_save_configuration/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}'
                     },
-                    body: JSON.stringify({ configuracion: configuracion, event_id: {{ event.id }} })
+                    body: JSON.stringify({ event: eventData, configuracion: configuracion })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Configuración guardada correctamente');
+                        alert('Evento y configuración guardados correctamente');
+                        window.location.href = '/success/url';  // Redirige a una página de éxito o de eventos
+                    } else {
+                        alert('Error al guardar: ' + data.error);
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Se produjo un error al guardar el evento y la configuración');
                 });
             });
         });
     </script>
 </head>
 <body>
-    <h1>Crear Evento</h1>
-    <form method="post">
-        {% csrf_token %}
-        <label for="numSillas">Número de sillas:</label>
-        <input type="number" id="numSillas" name="numSillas" min="1" required>
-        <button type="submit">Crear Evento</button>
-    </form>
-    <h2>Configurar Sillas</h2>
-    <div class="grid-stack"></div>
-    <button id="saveConfig">Guardar Configuración</button>
+    <div class="grid-container">
+        <h1>Crear Evento</h1>
+        <form method="post" id="eventForm">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div>
+                <h3>Configuración de Sillas</h3>
+                <label for="num_sillas">Número de sillas:</label>
+                <input type="number" id="num_sillas" name="num_sillas" min="0" required>
+                <button type="button" id="generateSeats">Generar Sillas</button>
+            </div>
+            <button type="submit">Guardar Evento y Configuración</button>
+        </form>
+        <div class="grid-stack"></div>
+        <div id="trash">Arrastra aquí para eliminar</div>
+    </div>
 </body>
 </html>
