@@ -54,6 +54,12 @@ INSTALLED_APPS = [
     'channels',
     "home",
     'event',
+    'social_django',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -65,6 +71,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'allauth.account.middleware.AccountMiddleware', 
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -180,3 +187,31 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_REDIRECT_URL = '/'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Configuración del sitio
+SITE_ID = 1
+
+# Configuración de autenticación
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # Backend de autenticación por defecto
+    'allauth.account.auth_backends.AuthenticationBackend',  # Backend de django-allauth
+)
+
+# Configura las credenciales de Google
+SOCIALACCOUNT_PROVIDERS = {
+ 'google': {
+        'APP': {
+            'client_id': '',
+            'secret': '',
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email'
+        ],
+        'AUTH_PARAMS': {
+            'redirect_uri': 'http://localhost:8000/accounts/google/login/callback/',  # Update this if necessary
+            'redirect_uri': 'http://localhost:5085/accounts/google/login/callback/',  # Update this if necessary
+        },
+    }
+}

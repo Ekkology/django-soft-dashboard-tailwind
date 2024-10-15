@@ -3,6 +3,12 @@ gunicorn
 uvicorn[standard]
 python-dotenv
 whitenoise
+# necesarias para allauth
+django-allauth
+requests
+PyJWT
+cryptography
+social-auth-app-django
 psycopg2-binary
 # mysqlclient
 channels== 3.0.5
