@@ -2,6 +2,12 @@ django
 gunicorn
 python-dotenv
 whitenoise
+# necesarias para allauth
+django-allauth
+requests
+PyJWT
+cryptography
+social-auth-app-django
 
-# psycopg2-binary
+psycopg2-binary
 # mysqlclient
