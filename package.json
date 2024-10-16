@@ -3,7 +3,7 @@
     "version": "1.0.4",
     "description": "",
     "scripts": {
-        "build": "tailwindcss build -i static/assets/scss/styles.scss -o static/assets/css/soft-ui-dashboard-tailwind.css",
+        "build": "tailwindcss build -i static/assets/scss/styles.scss -o static/assets/css/input.css",
         "min-css": "css-minify -d static/assets/css -o static/assets/css"
 
     },

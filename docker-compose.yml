@@ -6,6 +6,7 @@ services:
     build: .
     volumes:
       - ./templates:/app/templates
+      - ./static:/app/static 
     networks:
       - db_network
       - web_network
