@@ -4,18 +4,27 @@ from django.http import HttpResponse
 from home.forms import LoginForm, RegistrationForm, UserPasswordChangeForm, UserPasswordResetForm, UserSetPasswordForm
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetConfirmView
 from django.contrib.auth import logout
-
+from event.models import Event
+from datetime import datetime
+from django.core.paginator import Paginator
 from django.views.generic import CreateView
 
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
-#@login_required(login_url="/accounts/login/")
+@login_required(login_url="/accounts/login/")
 def index(request):
+    upcoming_events = Event.objects.filter(fecha__gte=datetime.now()).order_by('fecha')
+    # Paginación: Mostrar 10 eventos por página
+    paginator = Paginator(upcoming_events, 9)  # Cambia '10' si quieres más o menos eventos por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     #user_role = request.user.role 
     context = {
         'parent': 'pages',
         'segment': 'index',
+        'upcoming_events': upcoming_events,
+        'page_obj': page_obj,
         #'user_role': user_role,
     }
     return render(request, 'pages/dashboard.html', context)

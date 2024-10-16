@@ -108,7 +108,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-#AUTH_USER_MODEL = 'home.CustomUser'
+
 
 
 # Database
