@@ -96,6 +96,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
+
 ASGI_APPLICATION = 'core.asgi.application'
 
 CHANNEL_LAYERS = {
@@ -106,6 +107,8 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+#AUTH_USER_MODEL = 'home.CustomUser'
 
 
 # Database

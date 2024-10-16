@@ -10,11 +10,13 @@ from django.views.generic import CreateView
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
-
+#@login_required(login_url="/accounts/login/")
 def index(request):
+    #user_role = request.user.role 
     context = {
         'parent': 'pages',
-        'segment': 'index'
+        'segment': 'index',
+        #'user_role': user_role,
     }
     return render(request, 'pages/dashboard.html', context)
 
