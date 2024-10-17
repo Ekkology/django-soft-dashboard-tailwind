@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'channels',
     "home",
     'event',
+    'websocket',
     'social_django',
     'django.contrib.sites',
     'allauth',
