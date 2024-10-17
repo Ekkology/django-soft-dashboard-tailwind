@@ -9,15 +9,10 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR /app
-
 COPY . .
 
 # running migrations
 RUN python manage.py migrate
-
-# collect static files
-RUN python manage.py collectstatic --noinput
 
 # gunicorn
 CMD ["gunicorn", "--config", "gunicorn-cfg.py", "core.wsgi"]
