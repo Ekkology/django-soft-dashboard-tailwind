@@ -20,5 +20,6 @@ urlpatterns = [
     path('', include('home.urls')),
     path("admin/", admin.site.urls),
     path('event/', include('event.urls')),
+    path('reservations/', include('websocket.urls')),
     # path("", include('admin_datta.urls'))
 ]
