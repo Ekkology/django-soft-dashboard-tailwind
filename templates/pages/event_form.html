@@ -143,65 +143,71 @@
             });
 
             document.getElementById('eventForm').addEventListener('submit', function(event) {
-                event.preventDefault();
+            event.preventDefault();
 
-                var formData = new FormData(event.target);
-                var eventData = Object.fromEntries(formData.entries());
+            var formData = new FormData(event.target);
+            var eventData = Object.fromEntries(formData.entries());
 
-                var items = [];
-                grid.engine.nodes.forEach(function(node) {
-                    var numero = node.el.id.replace('silla', '');
+            var items = [];
+            
+            var numSillas = parseInt(document.getElementById('num_sillas').value) || 0;
+            console.log(numSillas);
+            items=Array.from({ length: numSillas }, (v, i) => i + 1);
+            var filas = []; // Aquí se guardarán las letras de las filas
+            grid.engine.nodes.forEach(function(node) {
+                
 
-                    items.push({
-                        id: node.el.id,
-                        posicion: {x: node.x, y: node.y},
-                        estado: 'disponible',
-                        numero: parseInt(numero)
-                    });
-                });
-
-                var configuracion = {
-                    tipo: 'rectangular',
-                    sillas: items
-                };
-
-                fetch('/event/create_event_and_save_configuration/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: JSON.stringify({ event: eventData, configuracion: configuracion })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Evento y configuración guardados correctamente');
-                        window.location.href = '/success/url';
-                    } else {
-                        alert('Error al guardar: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Se produjo un error al guardar el evento y la configuración');
-                });
+                // Verificar si ya hemos añadido esta fila
+                var fila = String.fromCharCode(65 + node.y); // Convertir índice de fila a letra (A, B, C, ...)
+                if (!filas.includes(fila)) {
+                    filas.push(fila);
+                }
             });
+
+            var configuracion = {
+                tipo: 'rectangular',
+                filas: filas, // Agregar las filas
+                sillas: items // Agregar los números de las sillas
+            };
+            
+            fetch('http://localhost:5085/event/create_event_and_save_configuration/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                
+                body: JSON.stringify({ event: eventData, configuracion: configuracion })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Evento y configuración guardados correctamente');
+                    window.location.href = 'http://localhost:5085/dashboard';
+                } else {
+                    alert('Error al guardar: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Se produjo un error al guardar el evento y la configuración');
+            });
+        });
         });
     </script>
 </head>
 <body>
     <div class="form-container">
         <h1 class="text-3xl font-semibold mb-4 text-center">Crear Evento</h1>
-        <form method="post" id="eventForm" class="space-y-4">
+        <form method="post" id="eventForm" class="space-y-6">
             {% csrf_token %}
             {{ form.as_p }}
-            <div class="space-y-2">
-                <h3 class="text-xl font-medium">Configuración de Sillas</h3>
+            <div class="space-y-4">
+                <h3 class="text-xl font-medium text-gray-800">Configuración de Sillas</h3>
                 <label for="num_sillas" class="block text-gray-700">Número de sillas:</label>
-                <input type="number" id="num_sillas" name="num_sillas" min="0" required class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <input type="number" id="num_sillas" name="num_sillas" min="0" required class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out">
                 <button type="button" id="generateSeats" class="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 shadow-md">
-                    <i class="fas fa-chair"></i> Generar Sillas
+                    <i class="fas fa-th"></i> Generar Sillas
                 </button>
             </div>
             <div class="grid-stack mt-4" id="grid">
