@@ -5,75 +5,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Evento</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack-h5.min.js"></script>
     <style>
+        /* Centrar el contenedor principal */
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0; /* Fondo general de la página */
+            background-color: #f3f4f6;
         }
-        .grid-container {
-            background-color: #e0e0e0; /* Fondo del contenedor GridStack */
+
+        /* Contenedor principal centrado y con scroll */
+        .form-container {
+            max-height: 90vh;
+            width: 60%;
+            overflow-y: auto;
+            margin: 0; /* Eliminar margen automático para centrar mejor */
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Sombra mejorada */
-            width: 80%; /* Ajusta el ancho del contenedor */
+            background-color: white;
+            border-radius: 0.9rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
+
+        /* Ajustes para las filas y sillas */
         .grid-stack-item-content {
-            background-color: white; /* Fondo blanco para los elementos */
-            border-radius: 4px;
+            background-color: white;
+            border-radius: 0.5rem;
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 50px !important;
-            height: 50px !important;
             position: relative;
-            background: url("{% static 'assets/img/illustrations/dev_seal_background.svg' %}") no-repeat center center; /* Fondo para el "dev seal" */
-            background-size: cover; /* Ajusta el fondo al tamaño del contenedor */
+            background-size: cover;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .seat-svg {
             width: 100%;
-            height: auto;
+            height: 100%;
         }
+
         .seat-number {
             position: absolute;
             bottom: 5px;
             left: 5px;
-            font-size: 12px;
+            font-size: 0.75rem;
             color: black;
         }
-        .row-label {
-            text-align: left;
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 10px;
+
+        /* Evitar scroll en los títulos de las filas */
+        .grid-stack-item[data-gs-no-move="yes"] .grid-stack-item-content {
+            overflow: hidden;
         }
-        /* Mejora la visibilidad de los campos de entrada */
-        input[type="number"], button {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para entradas y botones */
-            transition: box-shadow 0.3s;
-        }
-        input[type="number"]:focus, button:hover {
-            box-shadow: 0 0 10px rgba(0, 0, 255, 0.5); /* Efecto de sombra al enfocar o al pasar el ratón */
-            outline: none; /* Eliminar el contorno predeterminado */
-        }
-        /* Zona de Basura */
+
+        /* Configuración del botón de eliminación con ícono de basura */
         #trash {
             background-color: rgba(255, 0, 0, 0.5);
             text-align: center;
             padding: 10px;
             margin-top: 20px;
-            border-radius: 10px;
+            border-radius: 0.5rem;
             font-weight: bold;
             color: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
+
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -85,6 +84,16 @@
                 disableResize: true,
                 removable: '#trash',
                 removeTimeout: 1000
+            });
+
+            // Agregar evento para detectar cuando un elemento es arrastrado sobre el área de eliminación
+            var trashElement = document.getElementById('trash');
+            trashElement.addEventListener('dragover', function(event) {
+                trashElement.classList.add('dragover'); // Añadir clase para mostrar ícono de basura
+            });
+
+            trashElement.addEventListener('dragleave', function(event) {
+                trashElement.classList.remove('dragover'); // Quitar clase cuando el elemento sale
             });
 
             document.getElementById('generateSeats').addEventListener('click', function() {
@@ -99,7 +108,7 @@
                         var rowLabelItem = document.createElement('div');
                         rowLabelItem.className = 'grid-stack-item';
                         rowLabelItem.innerHTML = 
-                            `<div class="grid-stack-item-content row-label">
+                            `<div class="grid-stack-item-content text-left font-bold text-lg">
                                 Row ${letters[y]}
                             </div>`;
                         rowLabelItem.setAttribute('data-gs-x', 0);
@@ -135,7 +144,7 @@
             });
 
             document.getElementById('eventForm').addEventListener('submit', function(event) {
-                event.preventDefault();  // Evita que el formulario se envíe de la manera tradicional
+                event.preventDefault();
 
                 var formData = new FormData(event.target);
                 var eventData = Object.fromEntries(formData.entries());
@@ -161,8 +170,6 @@
                     sillas: items
                 };
 
-                console.log(JSON.stringify({ event: eventData, configuracion: configuracion }));
-
                 fetch('/event/create_event_and_save_configuration/', {
                     method: 'POST',
                     headers: {
@@ -175,7 +182,7 @@
                 .then(data => {
                     if (data.success) {
                         alert('Evento y configuración guardados correctamente');
-                        window.location.href = '/success/url';  // Redirige a una página de éxito o de eventos
+                        window.location.href = '/success/url';
                     } else {
                         alert('Error al guardar: ' + data.error);
                     }
@@ -189,21 +196,30 @@
     </script>
 </head>
 <body>
-    <div class="grid-container">
-        <h1>Crear Evento</h1>
-        <form method="post" id="eventForm">
+    <div class="form-container">
+        <h1 class="text-3xl font-semibold mb-4 text-center">Crear Evento</h1>
+        <form method="post" id="eventForm" class="space-y-4">
             {% csrf_token %}
             {{ form.as_p }}
-            <div>
-                <h3>Configuración de Sillas</h3>
-                <label for="num_sillas">Número de sillas:</label>
-                <input type="number" id="num_sillas" name="num_sillas" min="0" required>
-                <button type="button" id="generateSeats">Generar Sillas</button>
+            <div class="space-y-2">
+                <h3 class="text-xl font-medium">Configuración de Sillas</h3>
+                <label for="num_sillas" class="block text-gray-700">Número de sillas:</label>
+                <input type="number" id="num_sillas" name="num_sillas" min="0" required class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <button type="button" id="generateSeats" class="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 shadow-md">
+                    <i class="fas fa-chair"></i> Generar Sillas
+                </button>
             </div>
-            <button type="submit">Guardar Evento y Configuración</button>
+            <div class="grid-stack mt-4" id="grid">
+                <!-- Aquí se generarán las sillas -->
+            </div>
+            <button type="submit" class="w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-600 shadow-md">
+                <i class="fas fa-save"></i> Guardar Evento y Configuración
+            </button>
         </form>
-        <div class="grid-stack"></div>
-        <div id="trash">Arrastra aquí para eliminar</div>
+        <div id="trash" class="cursor-pointer mt-4 bg-red-500 text-white font-semibold py-2 px-4 rounded-md shadow-lg hover:bg-red-600 transition duration-200">
+            <i class="fas fa-trash-alt"></i> Arrastra aquí para eliminar
+        </div>
+        
     </div>
 </body>
 </html>
