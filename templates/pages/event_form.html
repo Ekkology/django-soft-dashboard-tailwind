@@ -183,7 +183,7 @@
             .then(data => {
                 if (data.success) {
                     alert('Evento y configuración guardados correctamente');
-                    window.location.href = 'http://localhost:5085/dashboard';
+                    window.location.href = 'http://localhost:5085/event/create_event_form/';
                 } else {
                     alert('Error al guardar: ' + data.error);
                 }
