@@ -9,8 +9,11 @@ class Event(models.Model):
 
 
 class Chair(models.Model):
-    numero = models.IntegerField()
+    numero = models.IntegerField(unique=True)
+    posicion_x = models.IntegerField()
+    posicion_y = models.IntegerField()
+    estado = models.CharField(max_length=20, default='disponible')
     evento = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='chairs', null=True)
 
     def __str__(self):
-        return f'chair {self.numero}'
+        return f'Chair {self.numero}'

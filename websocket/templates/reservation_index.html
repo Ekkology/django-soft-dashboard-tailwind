@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    {% include 'includes/head.html' %}
+    <style>
+        .seating-container {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);  /* Cada fila tendrá 9 asientos */
+            gap: 10px;  /* Espacio entre asientos */
+        }
+
+        .seat {
+            width: 70px;  /* Ajusta el tamaño según sea necesario */
+            height: 70px;  /* Ajusta el tamaño según sea necesario */
+            cursor: pointer;  /* Cambia el cursor cuando se pase sobre el asiento */
+            overflow: hidden; /* Para asegurarse de que no se muestren imágenes más grandes que el contenedor */
+        }
+
+        .seat img {
+            width: 100%;  /* La imagen ocupará todo el espacio del contenedor */
+            height: 100%;  /* La imagen ocupará todo el espacio del contenedor */
+            display: block;  /* Para eliminar el espacio debajo de la imagen */
+        }
+
+        .seat.selected img {
+            opacity: 0.5;  /* Cambia la opacidad de la imagen al seleccionar */
+        }
+    </style>
+
+</head>
+
+{% include 'includes/sidebar.html' %}
+
+<div class="ease-soft-in-out xl:ml-68.5 relative h-full max-h-screen bg-gray-50 transition-all duration-200">
+    <nav class="absolute z-20 flex flex-wrap items-center justify-between w-full px-6 py-2 text-white transition-all shadow-none duration-250 ease-soft-in lg:flex-nowrap lg:justify-start"
+        navbar-profile navbar-scroll="true">
+        <div class="flex items-center justify-between w-full px-6 py-1 mx-auto flex-wrap-inherit">
+            <nav>
+                <!-- breadcrumb -->
+                <ol class="flex flex-wrap pt-1 pl-2 pr-4 mr-12 bg-transparent rounded-lg sm:mr-16">
+                    <li class="leading-normal text-sm">
+                        <a class="opacity-50" href="javascript:;">Pages</a>
+                    </li>
+                    <li class="text-sm pl-2 capitalize leading-normal before:float-left before:pr-2 before:content-['/']"
+                        aria-current="page">Eventos</li>
+                </ol>
+                <h6 class="mb-2 ml-2 font-bold text-white capitalize">Reservaciones</h6>
+            </nav>
+
+            <div class="flex items-center mt-2 grow sm:mt-0 sm:mr-6 md:mr-0 lg:flex lg:basis-auto">
+                <div class="flex items-center md:ml-auto md:pr-4">
+                    <div class="relative flex flex-wrap items-stretch w-full transition-all rounded-lg ease-soft">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="w-full px-6 mx-auto">
+        <div class="relative flex items-center p-0 mt-6 overflow-hidden bg-center bg-cover min-h-75 rounded-2xl"
+            style="background-image: url('{% static 'assets/img/curved-images/curved0.jpg' %}'); background-position-y: 50%">
+            <span
+                class="absolute inset-y-0 w-full h-full bg-center bg-cover bg-gradient-to-tl from-purple-700 to-pink-500 opacity-60"></span>
+        </div>
+        <div
+            class="relative flex flex-col flex-auto min-w-0 p-4 mx-6 -mt-16 overflow-hidden break-words border-0 shadow-blur rounded-2xl bg-white/80 bg-clip-border backdrop-blur-2xl backdrop-saturate-200">
+            <div class="flex flex-wrap -mx-3">
+                <div class="flex-none w-auto max-w-full px-3 my-auto">
+                    <div class="h-full">
+                        <h5 class="mb-1">{{ event.nombre }}</h5>
+                        <h5 class="mb-1">{{ event.fecha }}</h5>
+                    </div>
+                </div>
+                <div class="w-full max-w-full px-3 mx-auto mt-4 sm:my-auto sm:mr-0 md:w-1/2 md:flex-none lg:w-4/12">
+                    <div class="relative right-0">
+                        <ul class="relative flex flex-wrap p-1 list-none bg-transparent rounded-xl" nav-pills
+                            role="tablist">
+                            <li class="z-30 flex-auto text-center">
+                                <a class="z-30 block w-full px-0 py-1 mb-0 transition-all border-0 rounded-lg ease-soft-in-out bg-inherit text-slate-700"
+                                    nav-link active href="javascript:;" role="tab" aria-selected="true">
+
+                                    <span> Asientos totales: {{ chairs }}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="w-full p-6 mx-auto">
+        <div class="flex flex-wrap -mx-3">
+            <div class="w-full max-w-full px-3">
+                <div class="w-full max-w-full px-3">
+                    <div
+                        class="relative flex flex-col h-full min-w-0 break-words bg-white border-0 shadow-soft-xl rounded-2xl bg-clip-border">
+                        <div class="flex-auto p-4 w-full">
+                            <h6 class="font-bold leading-tight uppercase text-xs text-slate-500">Puestos disponibles
+                            </h6>
+                            <!-- preparense que se viene -->
+                            <div class="seating-container">
+
+                                {% for i in event.configuracion.sillas %}
+                                <div class="seat" data-seat-id="{{ i }}" onclick="toggleSelection(this)">
+                                    <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" alt="Asiento">
+                                </div>
+                                {% endfor %}
+
+                                
+                            </div>
+                            <div class="p-6 mx-auto">
+                                <button onclick="submitReservation()" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Reservar asientos</button>
+                            </div>
+
+                            <!-- preparense que se viene -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include 'includes/footer.html' %}
+    </div>
+</div>
+
+<script>
+    function toggleSelection(element) {
+        element.classList.toggle('selected');
+    }
+
+    function submitReservation() {
+        const selectedSeats = Array.from(document.querySelectorAll('.seat.selected')).map(seat => seat.getAttribute('data-seat-id'));
+
+        if (selectedSeats.length === 0) {
+            alert('No has seleccionado ningún asiento');
+            return;
+        }
+
+        fetch('http://localhost:5085/reservations/reservar-asientos/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ seats: selectedSeats })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('¡Asientos reservados con éxito!');
+                window.location.reload();
+            } else {
+                alert('Hubo un problema al reservar los asientos.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
+</body>
+{% include 'includes/scripts.html' %}
+
+</html>
