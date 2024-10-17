@@ -1,17 +1,16 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reservación de Asientos</title>
-    {% load static %}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
-    <h1 class="text-3xl font-bold text-center my-6">Reservación de Asientos para el Evento {{ event_id }}</h1>
+    <h1 class="text-3xl font-bold text-center my-6">Reservación de Asientos para el Evento {{ evento.nombre }}</h1>
 
-    <!-- Tarjeta con descripción de las sillas  -->
     <div class="flex justify-center items-center space-x-4 bg-white p-2 shadow-md rounded-lg mx-auto mb-6 max-w-sm w-full">
         <div class="flex items-center space-x-2">
             <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" alt="Disponible" class="w-6 h-6 md:w-8 md:h-8">
@@ -28,7 +27,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gridstack@4.4.0/dist/gridstack-h5.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
-            const eventID = "{{ event_id }}";  // Usar el ID del evento pasado desde la vista
+            const eventID = "{{ evento.id }}";
             const ws = new WebSocket(`ws://${window.location.host}/ws/event/${eventID}/`);
 
             const grid = GridStack.init({
@@ -37,47 +36,61 @@
                 float: true
             });
 
-            const seats = [
-                { id: 'seat1', x: 0, y: 0, status: 'available' },
-                { id: 'seat2', x: 1, y: 0, status: 'available' },
-                { id: 'seat3', x: 2, y: 0, status: 'available' }
-                // Agrega más asientos según sea necesario
-            ];
+            let seats;
+            try {
+                seats = JSON.parse('{{ configuracion.sillas|escapejs }}');
+            } catch (error) {
+                console.error('Error al analizar la configuración de sillas:', error);
+                return;
+            }
 
             seats.forEach(seat => {
                 const el = document.createElement('div');
                 el.classList.add('grid-stack-item');
                 el.innerHTML = `
-                    <div class="grid-stack-item-content ${seat.status}" id="${seat.id}">
+                    <div class="grid-stack-item-content ${seat.estado}" id="${seat.id}">
                         <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" class="seat-svg w-10 h-10 mx-auto" />
                     </div>`;
-                grid.addWidget(el, { x: seat.x, y: seat.y, w: 1, h: 1 });
+                grid.addWidget(el, { x: seat.posicion.x, y: seat.posicion.y, w: 1, h: 1 });
 
                 el.addEventListener('click', () => {
                     const seatElement = document.getElementById(seat.id);
-                    const status = seatElement.classList.contains('available');
+                    const status = seatElement.classList.contains('disponible');
 
-                    console.log('Enviando mensaje:', { 'seat_id': seat.id, 'status': status });
+                    console.log('Enviando mensaje:', { 'seat_id': seat.id, 'status': !status });
 
                     ws.send(JSON.stringify({
                         'seat_id': seat.id,
-                        'status': status
+                        'status': !status
                     }));
                 });
             });
 
             ws.onmessage = (e) => {
-                const data = JSON.parse(e.data);
+                if (!e.data) {
+                    console.error('Mensaje vacío recibido');
+                    return;
+                }
+
+                let data;
+                try {
+                    data = JSON.parse(e.data);
+                } catch (error) {
+                    console.error('Error al analizar JSON:', error, 'Datos:', e.data);
+                    return;
+                }
+
                 const seatID = data.seat_id;
                 const status = data.status;
 
                 console.log('Mensaje recibido:', data);
 
-                // Actualiza el asiento en el DOM
                 const seatElement = document.getElementById(seatID);
                 if (seatElement) {
-                    seatElement.className = `grid-stack-item-content ${status ? 'reserved' : 'available'}`;
+                    seatElement.className = `grid-stack-item-content ${status ? 'reservado' : 'disponible'}`;
                     seatElement.querySelector('.seat-svg').src = status ? '{% static "assets/img/illustrations/silla_roja.svg" %}' : '{% static "assets/img/illustrations/silla_azul.svg" %}';
+                } else {
+                    console.warn('No se encontró el elemento del asiento:', seatID);
                 }
             };
 

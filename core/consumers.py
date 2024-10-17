@@ -24,9 +24,22 @@ class SeatConsumer(AsyncWebsocketConsumer):
         print('WebSocket desconectado:', self.channel_name)
 
     async def receive(self, text_data):
-        data = json.loads(text_data)
-        seat_id = data['seat_id']
-        status = data['status']
+        if not text_data:
+            print('Mensaje vacío recibido')
+            return
+
+        try:
+            data = json.loads(text_data)
+        except json.JSONDecodeError as e:
+            print('Error al decodificar JSON:', e)
+            return
+
+        seat_id = data.get('seat_id')
+        status = data.get('status')
+
+        if seat_id is None or status is None:
+            print('Datos de asiento incompletos:', data)
+            return
 
         print('Mensaje recibido:', data)
 

@@ -126,7 +126,8 @@
                         seatItem.setAttribute('data-gs-width', '1');
                         seatItem.setAttribute('data-gs-height', '1');
                         seatItem.setAttribute('data-gs-no-resize', 'yes');
-
+                        seatItem.setAttribute('data-seat-number', seatCounter); // Agregar el número de silla como atributo de datos
+                        
                         grid.addWidget(seatItem);
                         seatCounter++;
                     }
@@ -141,14 +142,18 @@
 
                 var items = [];
                 grid.engine.nodes.forEach(function(node) {
-                    var numero = node.el.id.replace('silla', '');
-
-                    items.push({
-                        id: node.el.id,
-                        posicion: {x: node.x, y: node.y},
-                        estado: 'disponible',
-                        numero: parseInt(numero)
-                    });
+                    var seatNumberElement = node.el.querySelector('.seat-number');
+                    if (seatNumberElement) {  // Verifica si el elemento existe
+                        var seatNumber = parseInt(seatNumberElement.textContent); // Obtener el número de la silla desde el contenido
+                        items.push({
+                            id: node.el.id,
+                            posicion: {x: node.x, y: node.y},
+                            estado: 'disponible',
+                            numero: seatNumber // Asignar el número de silla correctamente
+                        });
+                    } else {
+                        console.warn('Elemento con .seat-number no encontrado en:', node.el);
+                    }
                 });
 
                 var configuracion = {

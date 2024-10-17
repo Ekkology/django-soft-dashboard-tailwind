@@ -19,6 +19,11 @@ def create_event_and_save_configuration(request):
                 with transaction.atomic():
                     evento = form.save()
 
+                    # Verificar si los números de sillas ya existen antes de intentar crearlas
+                    numeros_existentes = chair.objects.filter(numero__in=[s['numero'] for s in configuracion.get('sillas', [])]).values_list('numero', flat=True)
+                    if numeros_existentes:
+                        return JsonResponse({'error': f'Números de sillas {list(numeros_existentes)} ya existen.'}, status=400)
+
                     for silla_data in configuracion.get('sillas', []):
                         numero = silla_data.get('numero')
                         posicion = silla_data.get('posicion')
@@ -44,8 +49,13 @@ def create_event_and_save_configuration(request):
             return JsonResponse({'error': 'JSON inválido.'}, status=400)
 
     return JsonResponse({'error': 'Método no permitido.'}, status=405)
+
 from django.shortcuts import render
 
 def show_event_form(request):
     form = EventForm()  # Suponiendo que tienes un formulario de eventos llamado EventForm
     return render(request, 'pages/event_form.html', {'form': form})
+
+def listar_eventos(request):
+    eventos = Event.objects.all()
+    return render(request, 'pages/listar_eventos.html', {'eventos': eventos})
