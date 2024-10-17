@@ -14,6 +14,7 @@ WORKDIR /app
 COPY . .
 
 # running migrations
+RUN python manage.py makemigrations
 RUN python manage.py migrate
 
 # collect static files
