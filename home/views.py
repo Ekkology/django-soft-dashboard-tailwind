@@ -11,6 +11,8 @@ from django.views.generic import CreateView
 
 from django.contrib.auth.decorators import login_required
 
+from .tasks import enviar_correo #celery type shi
+
 # Create your views here.
 @login_required(login_url="/accounts/login/")
 def index(request):
@@ -101,3 +103,11 @@ class UserPasswordChangeView(PasswordChangeView):
   template_name = 'accounts/password_change.html'
   form_class = UserPasswordChangeForm
 
+def enviar_correo_prueba(request):
+    asunto = 'CELERY FUNCIONANDO'
+    mensaje = 'xd'
+    destinatarios = ['xocebi9354@chainds.com'] #un correo random ahi de https://temp-mail.org/es/
+
+    enviar_correo.delay(asunto, mensaje, destinatarios)
+
+    return HttpResponse('Correo enviado de manera asíncrona, revisa tu bandeja de entrada.')
