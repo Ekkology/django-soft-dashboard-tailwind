@@ -57,3 +57,6 @@ def reservar_asientos(request):
             return JsonResponse({'success': False, 'error': str(e)})
     
     return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+def test(request):
+    return render(request, 'test.html')
