@@ -170,7 +170,7 @@
                 sillas: items // Agregar los números de las sillas
             };
             
-            fetch('http://localhost:5085/event/create_event_and_save_configuration/', {
+            fetch('http://localhost:8000/event/create_event_and_save_configuration/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -183,7 +183,7 @@
             .then(data => {
                 if (data.success) {
                     alert('Evento y configuración guardados correctamente');
-                    window.location.href = 'http://localhost:5085/event/create_event_form/';
+                    window.location.href = 'http://localhost:8000/event/create_event_form/';
                 } else {
                     alert('Error al guardar: ' + data.error);
                 }
