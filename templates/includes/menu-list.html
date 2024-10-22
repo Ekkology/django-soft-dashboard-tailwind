@@ -3,7 +3,7 @@
 <ul class="flex flex-col pl-0 mb-0">
   <li class="mt-0.5 w-full">
     {% if request.user.is_superuser %}
-    <a class="py-2.7 text-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors {% if 'index' in segment %}shadow-soft-xl rounded-lg bg-white font-semibold text-slate-700{% endif %} " href="{% url 'admin:index' %}">
+    <a class="py-2.7 text-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors {% if 'index' in segment %}shadow-soft-xl rounded-lg bg-white font-semibold text-slate-700{% endif %} " href="{% url 'index' %}">
     {% else %}
       <a class="py-2.7 text-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors {% if 'index' in segment %}shadow-soft-xl rounded-lg bg-white font-semibold text-slate-700{% endif %} " href="{% url 'index' %}">
     {% endif %}
@@ -28,7 +28,7 @@
           </g>
         </svg>
       </div>
-      <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft">Dashboard</span>
+      <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft">Dashboard23</span>
     </a>
   </li>
 
@@ -85,38 +85,24 @@
   {% admin_get_menu as app_list %}
   {% if app_list %}
       {% for app in app_list %}
-          {% if app.has_perms and not app.pinned %}
-            <li class="mt-0.5 w-full">
-              <a class="py-2.7 text-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors {% if app_label != app.label and app.url not in request.path|urlencode  %} collapsed{% endif %}" href="submenu-{{ app.app_label }}" >
-                <div class="shadow-soft-2xl mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
-                  <span class="sidebar-icon {{ app.icon }}"></span>
-                </div>
-                <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft">
-                  {{ app.label|slice:15 }}{% if app.label|length > 15 %}..{% endif %}
-                </span>
-              </a>
-
-              {% if app.models %}
-              <div class="multi-level ms-5 opacity-100 block" role="list" id="submenu-{{ app.app_label }}" aria-expanded="{% if app_label == app.label or app.url in request.path|urlencode %}true{% else %}false{% endif %}">
-                <ul class="flex-col ml-15 flex flex-wrap list-none pl-0 mb-0">
-                  {% for model in app.models %}
-                    {% if model.url %}
-                      <li class="{% if 'bootstrap-tables' in segment or model.url in request.path|urlencode %} active {% endif %} list-unstyled">
-                        <a class="inline-block py-2 px-4 no-underline" href="{{ model.url }}">
-                          <span class="nav-link-text ms-1 text-xs">{{ model.label }}</span>
-                        </a>
-                      </li>
-                    {% else %}
-                      <li class="list-unstyled text-xs">{{ model.label }}</li>
-                    {% endif %}
-                  {% endfor %}
-                </ul>
-              </div>
-            {% endif %}
-            </li>
+          {% if app.has_perms %}
+              {% if app.label == 'Accounts' or app.label == 'Websocket' %}
+                <li class="mt-4 w-full">  <!-- Ajuste mt-4 para más separación -->
+                  <a class="v text-sm ease-nav-brand my-e mx-4 flex items-center whitespace-nowrap px-4 transition-colors collapsed" href="submenu-{{ app.app_label }}">
+                    <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
+                      <span class="sidebar-icon {{ app.icon }}"></span>
+                    </div>
+                    <span class="ml-l duration-300 opacity-100 pointer-events-none ease-soft">
+                      {{ app.label|slice:15 }}{% if app.label|length > 15 %}..{% endif %}
+                    </span>
+                  </a>
+                </li>
+              {% endif %}
           {% endif %}
       {% endfor %}
   {% endif %}
+
+
 
   {% if request.user.is_authenticated and not request.user.is_superuser %}
 
