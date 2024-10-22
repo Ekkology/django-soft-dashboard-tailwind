@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+</head>
+
+<body>
+    <h1>websocket funcional</h1>
+    <input type="text" placeholder="el mensaje del websocket"/>
+    <button onclick="sendMessage()">Send Message</button>
+    <script>
+        var socket = new WebSocket('ws://' + window.location.host + '/ws/');
+
+        socket.onopen = function (event) {
+            console.log('WebSocket is connected.');
+        };
+
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+            console.log(data.message);
+        };
+
+        socket.onclose = function (event) {
+            console.log('Socket is closed. Reconnect will be attempted in 1 second.', event.reason);
+            setTimeout(function () {
+                socket = new WebSocket('ws://' + window.location.host + '/ws/');
+            }, 1000);
+        };
+
+        function sendMessage() {
+            const message = document.querySelector('input').value;
+            socket.send(JSON.stringify({ message }));
+        }
+    </script>
+</body>
+
+</html>

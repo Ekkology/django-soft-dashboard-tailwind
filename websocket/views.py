@@ -76,8 +76,15 @@ def reservar_asientos(request):
         except Chair.DoesNotExist:
             return JsonResponse({'error': 'Asiento no encontrado.'}, status=404)
         except Exception as e:
+
+
+
+
+
             print(f"Error: {e}")  # Para depuración
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Método no permitido.'}, status=405)
+def test(request):
+    return render(request, 'test.html')
 
