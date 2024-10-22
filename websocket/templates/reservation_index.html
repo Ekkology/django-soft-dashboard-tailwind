@@ -136,14 +136,14 @@
             alert('No has seleccionado ningún asiento');
             return;
         }
-
+        const eventId = "{{ event.id }}";
         fetch('http://localhost:5085/reservations/reservar-asientos/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}'
             },
-            body: JSON.stringify({ seats: selectedSeats })
+            body: JSON.stringify({ seats: selectedSeats, event_id: eventId })
         })
         .then(response => response.json())
         .then(data => {
