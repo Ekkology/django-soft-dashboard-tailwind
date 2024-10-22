@@ -28,8 +28,14 @@
             opacity: 0.5;  /* Cambia la opacidad de la imagen al seleccionar */
         }
 
-        .seat-ocupado {
-            background: red;
+        .seat.disabled {
+            cursor: not-allowed;  /* Cursor indica que no se puede hacer clic */
+            pointer-events: none; /* Desactiva todos los eventos de clic en este elemento */
+            opacity: 0.6;  /* Hace el asiento ocupado visualmente más opaco */
+        }
+
+        .seat-ocupado img {
+            opacity: 0.6; /* Hace el asiento ocupado más tenue */
         }
     </style>
 
@@ -108,17 +114,18 @@
 
                                 {% for i in event.configuracion.sillas %}
                                 {% if i in ya_ocupe_silla_numeros %}
-                                    <div class="seat" data-seat-id="{{ i }}" onclick="toggleSelection(this)">
-                                        <img src="{% static 'assets/img/illustrations/silla_roja.svg' %}" alt="Asiento">
+                                    <!-- Asiento ocupado, no permite selección -->
+                                    <div class="seat seat-ocupado disabled" data-seat-id="{{ i }}">
+                                        <img src="{% static 'assets/img/illustrations/silla_roja.svg' %}" alt="Asiento ocupado">
                                     </div>
                                 {% else %}
+                                    <!-- Asiento disponible, permite selección -->
                                     <div class="seat" data-seat-id="{{ i }}" onclick="toggleSelection(this)">
-                                        <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" alt="Asiento">
+                                        <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" alt="Asiento disponible">
                                     </div>
                                 {% endif %}
-                            {% endfor %}
-
-                            </div>
+                                {% endfor %}
+                            </div>                            
                             <div class="p-6 mx-auto">
                                 <button onclick="submitReservation()" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Reservar asientos</button>
                             </div>
