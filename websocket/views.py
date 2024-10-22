@@ -19,6 +19,9 @@ class EventDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['event'].configuracion = json.loads(context['event'].configuracion)
         context['chairs'] = len(context['event'].configuracion['sillas'])
+        context['ya_ocupe_silla'] = Chair.objects.filter(evento=context['event'])
+        context['ya_ocupe_silla_numeros'] = [silla.numero for silla in context['ya_ocupe_silla']]
+        #print(context['ya_ocupe_silla'])
         return context
 
     
@@ -52,6 +55,11 @@ def reservar_asientos(request):
             
             for seat_id in selected_seats:
                 user_id = request.user.id
+
+                existing_chair = Chair.objects.filter(numero=seat_id, evento=event).first()
+
+                if existing_chair:
+                    return JsonResponse({'error': 'Silla registrada'}, status=404)
 
                 # Crear o buscar la silla
                 chair = Chair()

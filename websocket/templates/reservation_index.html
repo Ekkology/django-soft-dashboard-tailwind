@@ -27,6 +27,10 @@
         .seat.selected img {
             opacity: 0.5;  /* Cambia la opacidad de la imagen al seleccionar */
         }
+
+        .seat-ocupado {
+            background: red;
+        }
     </style>
 
 </head>
@@ -103,12 +107,17 @@
                             <div class="seating-container">
 
                                 {% for i in event.configuracion.sillas %}
-                                <div class="seat" data-seat-id="{{ i }}" onclick="toggleSelection(this)">
-                                    <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" alt="Asiento">
-                                </div>
-                                {% endfor %}
+                                {% if i in ya_ocupe_silla_numeros %}
+                                    <div class="seat" data-seat-id="{{ i }}" onclick="toggleSelection(this)">
+                                        <img src="{% static 'assets/img/illustrations/silla_roja.svg' %}" alt="Asiento">
+                                    </div>
+                                {% else %}
+                                    <div class="seat" data-seat-id="{{ i }}" onclick="toggleSelection(this)">
+                                        <img src="{% static 'assets/img/illustrations/silla_azul.svg' %}" alt="Asiento">
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
 
-                                
                             </div>
                             <div class="p-6 mx-auto">
                                 <button onclick="submitReservation()" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Reservar asientos</button>
@@ -123,11 +132,35 @@
         {% include 'includes/footer.html' %}
     </div>
 </div>
-
 <script>
+
+    var socket = new WebSocket('ws://' + window.location.host + '/ws/');
+
+socket.onopen = function (event) {
+    console.log('WebSocket is connected.');
+};
+
+socket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    console.log(data.message);
+    if (data.message === 'reload') {
+            window.location.reload();  // Recargar la página
+        }
+};
+
+socket.onclose = function (event) {
+    console.log('Socket is closed. Reconnect will be attempted in 1 second.', event.reason);
+    setTimeout(function () {
+        socket = new WebSocket('ws://' + window.location.host + '/ws/');
+    }, 1000);
+};
+
+function sendMessage() {
+    socket.send(JSON.stringify( 'puto echo' ));
+};
     function toggleSelection(element) {
         element.classList.toggle('selected');
-    }
+    };
 
     function submitReservation() {
         const selectedSeats = Array.from(document.querySelectorAll('.seat.selected')).map(seat => seat.getAttribute('data-seat-id'));
@@ -137,7 +170,7 @@
             return;
         }
         const eventId = "{{ event.id }}";
-        fetch('http://localhost:5085/reservations/reservar-asientos/', {
+        fetch('http://localhost:8000/reservations/reservar-asientos/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -149,14 +182,17 @@
         .then(data => {
             if (data.success) {
                 alert('¡Asientos reservados con éxito!');
-                window.location.reload();
+               // window.location.reload();
+                sendMessage();
             } else {
                 alert('Hubo un problema al reservar los asientos.');
             }
         })
         .catch(error => console.error('Error:', error));
-    }
+    };
+
 </script>
+
 
 </body>
 {% include 'includes/scripts.html' %}
