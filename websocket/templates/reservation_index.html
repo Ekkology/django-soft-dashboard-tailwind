@@ -144,7 +144,7 @@ socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
     console.log(data.message);
     if (data.message === 'reload') {
-            window.location.reload();  // Recargar la página
+            window.location.reload();
         }
 };
 
@@ -156,11 +156,11 @@ socket.onclose = function (event) {
 };
 
 function sendMessage() {
-    socket.send(JSON.stringify( 'puto echo' ));
+    socket.send(JSON.stringify({ message: 'reload' }));
 };
     function toggleSelection(element) {
         element.classList.toggle('selected');
-    };
+    }
 
     function submitReservation() {
         const selectedSeats = Array.from(document.querySelectorAll('.seat.selected')).map(seat => seat.getAttribute('data-seat-id'));
@@ -182,7 +182,7 @@ function sendMessage() {
         .then(data => {
             if (data.success) {
                 alert('¡Asientos reservados con éxito!');
-               // window.location.reload();
+                // window.location.reload();
                 sendMessage();
             } else {
                 alert('Hubo un problema al reservar los asientos.');
