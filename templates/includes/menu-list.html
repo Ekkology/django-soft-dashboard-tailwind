@@ -82,7 +82,7 @@
   {% endif %}
 
 
-  {% admin_get_menu as app_list %}
+  {% comment %} {% admin_get_menu as app_list %}
   {% if app_list %}
       {% for app in app_list %}
           {% if app.has_perms %}
@@ -100,7 +100,7 @@
               {% endif %}
           {% endif %}
       {% endfor %}
-  {% endif %}
+  {% endif %} {% endcomment %}
 
 
 
